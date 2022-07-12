@@ -22,8 +22,8 @@ const
     "reset": """{"system":{"reset":{"delay":1}}}""",
     "schedule": """{"schedule":{"get_rules":{}}}""",
     "time": """{"time":{"get_time":{}}}""",
-    # TODO: Figure out how to use wlscan
-    "wlanscan": """{"netif":{"get_scaninfo":{"refresh":0}}}"""
+    "wlanscan": """{"netif":{"get_scaninfo":{"refresh":0}}}""",
+    "scanaps": """{"netif":{"get_scaninfo":{"refresh":1}}}"""
   }.toTable()
 
 proc xorPayload(payload: string): seq[byte] =
@@ -67,39 +67,52 @@ proc send*(deviceIP: string, json: string): Future[string] {.async.} =
 
 # Commands
 
+proc runCommand*(deviceIP: string, command: static string): Future[string] {.async.} =
+  ## Runs a given command.
+  ## @param {deviceIP} - The IP address of the tp-link smart device.
+  ## @param {command} - A key from the `commands` table.
+  static:
+    assert commands.hasKey(command)
+
+  return await send(deviceIP, commands[command])
+
 proc querySysInfo*(deviceIP: string): Future[string] {.async.} =
-  return await send(deviceIP, commands["info"])
+  return await runCommand(deviceIP, "info")
 
 proc queryTime*(deviceIP: string): Future[string] {.async.} =
-  return await send(deviceIP, commands["time"])
+  return await runCommand(deviceIP, "time")
 
 proc queryScheduleInfo*(deviceIP: string): Future[string] {.async.} =
-  return await send(deviceIP, commands["schedule"])
+  return await runCommand(deviceIP, "schedule")
 
 proc queryCloudInfo*(deviceIP: string): Future[string] {.async.} =
-  return await send(deviceIP, commands["cloudinfo"])
+  return await runCommand(deviceIP, "cloudinfo")
 
 proc queryAntiTheftInfo*(deviceIP: string): Future[string] {.async.} =
-  return await send(deviceIP, commands["antitheft"])
+  return await runCommand(deviceIP, "antitheft")
 
 proc queryEnegryInfo*(deviceIP: string): Future[string] {.async.} =
-  return await send(deviceIP, commands["energy"])
+  return await runCommand(deviceIP, "energy")
 
 proc turnOn*(deviceIP: string): Future[string] {.async.} =
-  return await send(deviceIP, commands["on"])
+  return await runCommand(deviceIP, "on")
 
 proc turnOff*(deviceIP: string): Future[string] {.async.} =
-  return await send(deviceIP, commands["off"])
+  return await runCommand(deviceIP, "off")
 
 proc turnOnLED*(deviceIP: string): Future[string] {.async.} =
-  return await send(deviceIP, commands["ledon"])
+  return await runCommand(deviceIP, "ledon")
 
 proc turnOffLED*(deviceIP: string): Future[string] {.async.} =
-  return await send(deviceIP, commands["ledoff"])
+  return await runCommand(deviceIP, "ledoff")
 
 proc reboot*(deviceIP: string): Future[string] {.async.} =
-  return await send(deviceIP, commands["reboot"])
+  return await runCommand(deviceIP, "reboot")
 
 proc reset*(deviceIP: string): Future[string] {.async.} =
-  return await send(deviceIP, commands["reset"])
+  return await runCommand(deviceIP, "reset")
+
+proc scanAvailableAPs*(deviceIP: string): Future[string] {.async.} =
+  return await runCommand(deviceIP, "scanaps")
+
 
